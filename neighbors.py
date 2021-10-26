@@ -1,6 +1,6 @@
 import numpy as np
 ## local import
-from distance import Distances
+from distances import Distances
 
 DISTANCE_FUNCS = {
         'canberra': Distances.canberra_distance,
