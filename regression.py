@@ -1,23 +1,29 @@
-""" Regression models """
+""" Regression models. """
 import numpy as np
+
+# local helper function
+from helper import prepare_data
 
 class LinearRegression:
     """ Ordinary least squares Linear Regression. """
-    def __init__(self, lr=0.001, n_epoch=1000):
+    def __init__(self, lr=1e-4, n_epoch=1000, fit_intercept=True):
         self.lr = lr
         self.n_epoch = n_epoch
         self.weights = None
         self.fit_intercept = None
-        self.seed = None
-        self.rng = np.random.default_rng(seed=self.seed)
 
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weights=None):
         """ Fit linear model using GD. """
-        X, y = self._prepare_data(X, y)
-        N = len(X)
+        X, y = prepare_data(X, y)
+        _, D = X.shape
 
-        self.weights = np.zeros((D, 1))
+        if sample_weights:
+            assert sample_weights.shape == ((D, 1))
+            self.weights = sample_weights
+        else:
+            self.weights = np.zeros((D, 1))
+
         for _ in range(self.n_epoch):
             y_hat = self.predict(X)
             delta_w = X.T @ y_hat
@@ -25,7 +31,7 @@ class LinearRegression:
             self.weights -= self.lr * delta_w
 
 
-    def fit_closed_form(self, X, y, sample_weight=None):
+    def fit_closed_form(self, X, y):
         """ Fit linear model using closed form solution.
             Computes MLE estimate of argmin NLL(w).
 
@@ -33,46 +39,34 @@ class LinearRegression:
 
             ref ~ Murphy MLaPP [Ch.7.3; pg.222]
         """
-        X, y = self._prepare_data(X, y)
+        X, y = prepare_data(X, y)
         self.weights = np.invert(X.T @ X) @ X.T @ y
 
 
     def predict(self, X):
         """ Predict linear model. """
-        X, _ = self._prepare_data(X)
+        X = prepare_data(X)
         return X @ self.weights
 
 
-    def mse(self, X, y):
+    def loss(self, X, y):
         """ Score model performance using Mean Squared Error
             :math: mse = \frac{1}{N} \sum_{i=1}^{N} (y_hat - y)^2
         """
-        X, y = self._prepare_data(X, y)
-
+        X, y = prepare_data(X, y)
         y_hat = self.predict(X)
         return np.square(y_hat - y).mean()
 
 
-    def _prepare_data(self, X, y=None):
-        X = np.array(X)
-        if len(X) == 1:
-            X = np.expand_dims(X, axis=0)
-        y = np.array(y)
-        N, D = X.shape
-        if y.shape == (N,):
-            y = np.expand_dims(y, axis=1)
-        return X, y
+class LogisticRegression:
+    def __init__(self):
+        pass
 
+    def fit(self, X, y):
+        pass
 
-if __name__ == '__main__':
-    print('Some manual tests.')
-    N, D = 100, 3
-    X = np.random.random(size=(N, D))
-    X += np.random.normal(0, 2, size=(N, D))
-    y = np.dot(X, [1,1,1])
-    lr = LinearRegression()
-    lr.fit(X, y)
-    x_test = np.array(([[1, 1, 1], [2,2,2]]))
-    y_hat = lr.predict(x_test)
-    print(y_hat)
-    print(lr.mse(X, y))
+    def predict(self, X):
+        pass
+
+    def loss(self, X, y):
+        pass
