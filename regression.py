@@ -1,6 +1,6 @@
 """ Regression models. """
-import numpy as np
 
+import numpy as np
 # local helper function
 from helper import prepare_data
 
@@ -14,7 +14,7 @@ class LinearRegression:
 
 
     def fit(self, X, y, sample_weights=None):
-        """ Fit linear model using GD. """
+        """ Fit linear model using gradient descent. """
         X, y = prepare_data(X, y)
         _, D = X.shape
 
@@ -33,14 +33,15 @@ class LinearRegression:
 
     def fit_closed_form(self, X, y):
         """ Fit linear model using closed form solution.
-            Computes MLE estimate of argmin NLL(w).
 
-            :math: W^* = (X^T @ X)^{-1} @ X^T @ y
+        Computes MLE estimate of argmin NLL(w).
+        :math: W^* = (X^T @ X)^{-1} @ X^T @ y
 
-            ref ~ Murphy MLaPP [Ch.7.3; pg.222]
+        ref ~ Murphy MLaPP [Ch.7.3; pg.222]
         """
         X, y = prepare_data(X, y)
-        self.weights = np.invert(X.T @ X) @ X.T @ y
+        # typically X.T @ X is not invertible, so we use the pseudoinverse
+        self.weights = np.linalg.pinv(X.T @ X) @ X.T @ y
 
 
     def predict(self, X):
@@ -50,23 +51,11 @@ class LinearRegression:
 
 
     def loss(self, X, y):
-        """ Score model performance using Mean Squared Error
-            :math: mse = \frac{1}{N} \sum_{i=1}^{N} (y_hat - y)^2
+        """ Score model performance using Mean Squared Error.
+
+        :math: mse = frac{1}{N} sum_{i=1}^{N} (y_hat - y)^2
         """
         X, y = prepare_data(X, y)
         y_hat = self.predict(X)
         return np.square(y_hat - y).mean()
 
-
-class LogisticRegression:
-    def __init__(self):
-        pass
-
-    def fit(self, X, y):
-        pass
-
-    def predict(self, X):
-        pass
-
-    def loss(self, X, y):
-        pass
